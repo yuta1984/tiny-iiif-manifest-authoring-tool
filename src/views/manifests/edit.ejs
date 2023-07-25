@@ -1,0 +1,5 @@
+<h1>Edit IIIF Manifest</h1>
+
+<form action="/manifests/<%= id %>" method="post">
+  <%- include('./_form.ejs', {data: manifest, isEdit: true}) %>
+</form>

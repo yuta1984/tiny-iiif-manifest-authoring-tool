@@ -1,0 +1,44 @@
+<script src="/public/js/images.js"></script>
+<h1>Manage IIIF Images</h1>
+<h2>Manifest ID: <a href="/manifests/<%= manifest.id %>.json" target="_blank"><%= manifest.id %></th></a></h2>
+<form action="/manifests/<%= manifest.id %>/images" method="post" enctype="multipart/form-data">
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Index</th>
+      <th scope="col">Thumbnail</th>
+      <th scope="col">Status</th>
+      <th scope="col">Size</th>
+      <th scope="col"><Del></Del>Actions</th>
+    </tr>
+  </thead>
+  <tbody id="image-table-body">
+    <% images.forEach((image, index) => { %>
+    <tr>
+      <th scope="row"><%= index + 1 %></th>      
+      <td>
+        <img
+          src="/iiif/2/<%= image.name %>.tif/full/!100,100/0/default.jpg"
+          alt="Thumbnail"
+          style="max-width: 100px"
+        />
+      </td>
+      <td><%= image.status %></td>
+      <td><%= image.width %>x<%= image.height %></td>
+      <td></td>
+      <% }) %>
+  </tbody>
+</table>
+<div style="margin: 10px">
+  <input
+    type="file"
+    name="images"
+    multiple
+    accept=".jpg, .jpeg"
+    onChange="addPreviews(event)"
+  />
+  </div>
+  <button type="submit" class="btn btn-primary">Upload</button>  
+</div>
+</form>
+

@@ -1,0 +1,89 @@
+<% if(locals.errors) { %>
+<div class="alert alert-danger" role="alert">
+  <ul class="mb-0">
+    <% errors.forEach(function(error) { %>
+    <li><%= error.path %>: <%= error.msg %></li>
+    <% }) %>
+  </ul>
+</div>
+<% } %>
+
+<div class="mb-3">
+  <label class="form-label"
+    >ID (must be spelled only with A-Z, a-z, 0-9, and _)</label
+  >
+  <input
+    type="text"
+    class="form-control"
+    value="<%= locals.data && data.id %>"
+    name="id"    
+    <% if(isEdit){ %> disabled <%} %>    
+  />
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Label</label>
+  <input
+    type="text"
+    class="form-control"
+    name="label"
+    value="<%= locals.data && data.label %>"
+  />
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Description</label>
+  <input
+    type="text"
+    class="form-control"
+    name="description"
+    value="<%= locals.data && data.description %>"
+  />
+</div>
+<div class="mb-3">
+  <label class="form-label">Attribution</label>
+  <input
+    type="text"
+    class="form-control"
+    name="attribution"
+    value="<%= locals.data && data.attribution %>"
+  />
+</div>
+<div class="mb-3">
+  <label class="form-label">Viewing hint</label>
+  <select class="form-select mb-3" name="viewingHint">
+    <% const hints=["individuals", "paged", "continuous", "multi-part",
+    "non-paged", "top", "facing-pages"] %> <% hints.forEach(function(val) { %>
+    <option value="<%= val %>" <% if(val === data.viewingHint){ %>selected<% } %> ><%= val %></option>
+    <% }) %>
+  </select>
+</div>
+<div class="mb-3">
+  <label class="form-label">Viewing direction</label>
+  <select class="form-select mb-3" name="viewingDirection">
+    <% const dirs=["left-to-right", "right-to-left", "top-to-bottom", "bottom-to-top"] %> 
+    <% dirs.forEach(function(val) { %>
+    <option value="<%= val %>" <% if(val === data.viewingDirection){ %>selected<% } %> ><%= val %></option>
+    <% }) %>
+  </select>
+  </select>
+</div>
+<div class="mb-3">
+  <label class="form-label">Logo (must be an URL)</label>
+  <input
+    type="text"
+    class="form-control"
+    name="logo"
+    value="<%= locals.data && data.logo %>"
+  />
+</div>
+<div class="mb-3">
+  <label class="form-label">License (must be an URL)</label>
+  <input
+    type="text"
+    class="form-control"
+    name="license"
+    value="<%= locals.data && data.license %>"
+  />
+</div>
+<button type="submit" class="btn btn-primary">Save</button>

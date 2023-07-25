@@ -1,0 +1,62 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">Owner</th>
+      <th scope="col">Label</th>
+      <th scope="col"><Del></Del>Description</th>
+      <th scope="col"><Del></Del>Image size</th>
+      <th scope="col"><Del></Del>Last update</th>
+      <th scope="col"><Del></Del>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% manifests.forEach((manifest) => { %>
+    <tr>
+      <th scope="row">
+        <a href="/manifests/<%= manifest.id %>.json" target="_blank"><%= manifest.id %></th></a>
+      <td><%= manifest.uid %></td>
+      <td><%= manifest.label %></td>
+      <td><%= manifest.description %></td>
+      <td></td>
+      <td></td>
+      <td>
+        <div class="dropdown">
+          <button
+            class="btn btn-sm btn-primary dropdown-toggle"
+            type="button"
+            id="dropdownMenuButton1"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Actions
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+               <li>
+              <a
+                class="dropdown-item"
+                href="/manifests/<%= manifest.id %>/browse"
+                >Browse</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item" href="/manifests/<%= manifest.id %>/edit"
+                >Edit</a
+              >
+            </li>
+            <li>
+              <a
+                class="dropdown-item"
+                href="/manifests/<%= manifest.id %>/images"
+                >Manage images</a
+              >
+            </li>
+            <li><a class="dropdown-item" href="#">Delete</a></li>
+          </ul>
+        </div>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<a href="/manifests/new" class="btn btn-primary">Add new manifest</a

@@ -1,0 +1,19 @@
+<div id="image_canvas" style="height: 500px"></div>
+<link
+  rel="stylesheet"
+  href="http://codh.rois.ac.jp/software/iiif-curation-viewer-embedded/dist/icviewer-embedded.bundle.css"
+/>
+<script src="http://codh.rois.ac.jp/software/iiif-curation-viewer-embedded/dist/icviewer-embedded.bundle.min.js"></script>
+<script>
+  (function () {
+    IIIFCurationViewerEmbedded({
+      id: "image_canvas",
+      data: {
+        manifest: "/manifests/<%= manifest.id %>.json",
+      },
+    });
+  })();
+</script>
+<a href="/manifests/<%= manifest.id %>.json" target="_blank"
+  >IIIF Curation Viewerで開く</a
+>
