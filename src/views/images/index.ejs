@@ -1,6 +1,6 @@
 <script src="/public/js/images.js"></script>
 <h1>Manage IIIF Images</h1>
-<h2>Manifest ID: <a href="/manifests/<%= manifest.id %>.json" target="_blank"><%= manifest.id %></th></a></h2>
+<h2>Manifest ID: <a href="/api/presentation/2/<%= manifest.id %>.json" target="_blank"><%= manifest.id %></th></a></h2>
 <form action="/manifests/<%= manifest.id %>/images" method="post" enctype="multipart/form-data">
 <table class="table">
   <thead>

@@ -1,8 +1,9 @@
-import sqlite3 from "sqlite3";
-import express from "express";
-import { open } from "sqlite";
-import imagemagick from "imagemagick";
-import bufferImageSize from "buffer-image-size";
+import sqlite3 from 'sqlite3';
+import express from 'express';
+import { open } from 'sqlite';
+import imagemagick from 'imagemagick';
+import bufferImageSize from 'buffer-image-size';
+import { checkAuth } from '../utils/auth';
 
 sqlite3.verbose();
 
@@ -10,7 +11,7 @@ const router = express.Router();
 
 const getDB = async () => {
   return await open<sqlite3.Database, sqlite3.Statement>({
-    filename: "./db/db.sqlite3",
+    filename: './db/db.sqlite3',
     driver: sqlite3.Database,
   });
 };
@@ -22,10 +23,10 @@ const convertToPtiff = async (name: string) => {
     imagemagick.convert(
       [
         input,
-        "-define",
-        "tiff:tile-geometry=256x256",
-        "-compress",
-        "lzw",
+        '-define',
+        'tiff:tile-geometry=256x256',
+        '-compress',
+        'lzw',
         output,
       ],
       (err, stdout) => {
@@ -45,21 +46,27 @@ const updateImageStatus = async (name: string) => {
     SET status = ?
     WHERE name = ?
   `;
-  await db.run(sql, ["converted", name]);
+  await db.run(sql, ['converted', name]);
   db.close();
 };
 
-router.get("/:id/images", async (req, res) => {
+router.get('/:id/images', async (req, res) => {
   const db = await getDB();
   const id = req.params.id;
-  const manifest = await db.get("SELECT * FROM manifests WHERE id = ?", id);
-  const images = await db.all("SELECT * FROM images WHERE manifestId = ?", id);
+  const manifest = await db.get(
+    'SELECT * FROM manifests WHERE id = ?',
+    id
+  );
+  const images = await db.all(
+    'SELECT * FROM images WHERE manifestId = ?',
+    id
+  );
   db.close();
-  return res.render("images/index", { manifest, images });
+  return res.render('images/index', { manifest, images });
 });
 
 // accept image uploads and convert them to pyramid tiffs
-router.post("/:id/images", async (req, res) => {
+router.post('/:id/images', checkAuth, async (req, res) => {
   const db = await getDB();
   const id = req.params.id;
   console.log(req.files!.images);
@@ -82,12 +89,12 @@ router.post("/:id/images", async (req, res) => {
         if (err) {
           console.log(err);
         } else {
-          console.log("uploaded: ", hash);
-          console.log("converting to ptiff...");
+          console.log('uploaded: ', hash);
+          console.log('converting to ptiff...');
           await convertToPtiff(hash);
-          console.log("done converting to ptiff");
+          console.log('done converting to ptiff');
           await updateImageStatus(hash);
-          console.log("done updating image status");
+          console.log('done updating image status');
         }
       }
     );
@@ -101,8 +108,8 @@ router.post("/:id/images", async (req, res) => {
       dimension.width,
       dimension.height,
       id,
-      "hashimoto",
-      "converting",
+      'hashimoto',
+      'converting',
       new Date().getTime(),
     ]);
   });

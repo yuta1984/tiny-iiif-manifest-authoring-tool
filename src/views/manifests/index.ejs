@@ -14,7 +14,7 @@
     <% manifests.forEach((manifest) => { %>
     <tr>
       <th scope="row">
-        <a href="/manifests/<%= manifest.id %>.json" target="_blank"><%= manifest.id %></th></a>
+        <a href="/api/presentation/2/<%= manifest.id %>.json" target="_blank"><%= manifest.id %></th></a>
       <td><%= manifest.uid %></td>
       <td><%= manifest.label %></td>
       <td><%= manifest.description %></td>

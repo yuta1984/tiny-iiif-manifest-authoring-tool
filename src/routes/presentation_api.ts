@@ -1,0 +1,85 @@
+import express from 'express';
+import {
+  getImagesByManifestId,
+  getManifestById,
+} from '../utils/db';
+import { IIIF_URI_PREFIX } from '../config';
+
+const router = express.Router();
+
+router.get('/:id/browse', async (req, res) => {
+  const id = req.params.id;
+  try {
+    const manifest = await getManifestById(id);
+    return res.render('manifests/browse', { manifest });
+  } catch (err) {
+    console.log(err);
+  }
+});
+// PREFIX/manifests/2/:id.json
+router.get('/2/:id.json', async (req, res) => {
+  const id = req.params.id;
+  // get manifest record by id
+  const manifest = await getManifestById(id);
+  if (!manifest) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  const manifestId = `${IIIF_URI_PREFIX}/manifests/2/${id}.json`;
+  const images = await getImagesByManifestId(id);
+  const json: any = {};
+  json['@context'] =
+    'http://iiif.io/api/presentation/2/context.json';
+  json['@id'] = manifestId;
+  json['@type'] = 'sc:Manifest';
+  json.label = manifest.label;
+  json.description = manifest.description;
+  json.attribution = manifest.attribution;
+  json.logo = manifest.logo;
+  json.license = manifest.license;
+  json.seeAlso = manifest.seeAlso;
+  json.metadata = manifest.metadata;
+  json.sequences = [
+    {
+      '@type': 'sc:Sequence',
+      viewIngHint: manifest.viewingHint,
+      canvases: images.map((image: any, index: number) => {
+        const canvasURI = `${manifestId}/canvas/${
+          index + 1
+        }`;
+        const resourceId = `${IIIF_URI_PREFIX}/api/image/2/${image.name}.tif/full/full/0/default.jpg`;
+        const imageId = `${IIIF_URI_PREFIX}/api/image/2/${image.name}.tif`;
+        return {
+          '@id': canvasURI,
+          '@type': 'sc:Canvas',
+          label: `Image ${index + 1}`,
+          height: image.height,
+          width: image.width,
+          images: [
+            {
+              '@type': 'oa:Annotation',
+              motivation: 'sc:painting',
+              on: canvasURI,
+              resource: {
+                '@id': resourceId,
+                '@type': 'dctypes:Image',
+                format: 'image/jpeg',
+                height: image.height,
+                width: image.width,
+                service: {
+                  '@context':
+                    'http://iiif.io/api/image/2/context.json',
+                  '@id': imageId,
+                  profile:
+                    'http://iiif.io/api/image/2/level2.json',
+                },
+              },
+            },
+          ],
+        };
+      }),
+    },
+  ];
+  return res.json(json);
+});
+
+export default router;
