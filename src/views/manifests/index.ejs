@@ -5,8 +5,8 @@
       <th scope="col">Owner</th>
       <th scope="col">Label</th>
       <th scope="col"><Del></Del>Description</th>
-      <th scope="col"><Del></Del>Image size</th>
-      <th scope="col"><Del></Del>Last update</th>
+      <th scope="col"><Del></Del>Created at</th>      
+      <th scope="col"><Del></Del>Updated at</th>
       <th scope="col"><Del></Del>Actions</th>
     </tr>
   </thead>
@@ -17,9 +17,9 @@
         <a href="/api/presentation/2/<%= manifest.id %>.json" target="_blank"><%= manifest.id %></th></a>
       <td><%= manifest.uid %></td>
       <td><%= manifest.label %></td>
-      <td><%= manifest.description %></td>
-      <td></td>
-      <td></td>
+      <td><%= manifest.description %></td>        
+      <td><%= new Date(manifest.createdAt).toISOString() %></td>
+      <td><%= new Date(manifest.updatedAt).toISOString() %></td>
       <td>
         <div class="dropdown">
           <button

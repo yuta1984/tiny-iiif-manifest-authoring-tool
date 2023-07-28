@@ -7,15 +7,6 @@ import { IIIF_URI_PREFIX } from '../config';
 
 const router = express.Router();
 
-router.get('/:id/browse', async (req, res) => {
-  const id = req.params.id;
-  try {
-    const manifest = await getManifestById(id);
-    return res.render('manifests/browse', { manifest });
-  } catch (err) {
-    console.log(err);
-  }
-});
 // PREFIX/manifests/2/:id.json
 router.get('/2/:id.json', async (req, res) => {
   const id = req.params.id;
@@ -24,7 +15,7 @@ router.get('/2/:id.json', async (req, res) => {
   if (!manifest) {
     return res.status(404).json({ error: 'Not found' });
   }
-  const manifestId = `${IIIF_URI_PREFIX}/manifests/2/${id}.json`;
+  const manifestId = `${IIIF_URI_PREFIX}manifests/2/${id}.json`;
   const images = await getImagesByManifestId(id);
   const json: any = {};
   json['@context'] =
@@ -41,13 +32,14 @@ router.get('/2/:id.json', async (req, res) => {
   json.sequences = [
     {
       '@type': 'sc:Sequence',
-      viewIngHint: manifest.viewingHint,
+      viewingHint: manifest.viewingHint,
+      viewingDirection: manifest.viewingDirection,
       canvases: images.map((image: any, index: number) => {
         const canvasURI = `${manifestId}/canvas/${
           index + 1
         }`;
-        const resourceId = `${IIIF_URI_PREFIX}/api/image/2/${image.name}.tif/full/full/0/default.jpg`;
-        const imageId = `${IIIF_URI_PREFIX}/api/image/2/${image.name}.tif`;
+        const resourceId = `${IIIF_URI_PREFIX}api/iiif/2/${image.name}.tif/full/full/0/default.jpg`;
+        const imageId = `${IIIF_URI_PREFIX}api/iiif/2/${image.name}.tif`;
         return {
           '@id': canvasURI,
           '@type': 'sc:Canvas',

@@ -61,8 +61,8 @@ app.get('/', (req, res) => {
 app.use(authRoutes);
 app.use('/manifests', maniestRoutes);
 app.use('/manifests', imageRoutes);
-app.use('/api/image/2', IIIFRouter(2));
-app.use('/api/image/3', IIIFRouter(3));
+app.use('/api/iiif/2', IIIFRouter(2));
+app.use('/api/iiif/3', IIIFRouter(3));
 app.use('/api/presentation/', PresentationAPIRouter);
 
 app.listen(PORT, () => {

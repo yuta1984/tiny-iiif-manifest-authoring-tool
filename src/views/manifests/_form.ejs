@@ -10,7 +10,7 @@
 
 <div class="mb-3">
   <label class="form-label"
-    >ID (must be spelled only with A-Z, a-z, 0-9, and _)</label
+    >ID (must be unique and spelled only with A-Z, a-z, 0-9, and _)</label
   >
   <input
     type="text"
@@ -85,6 +85,15 @@
     value="<%= locals.data && data.license %>"
   />
     
+</div>
+<div class="mb-3">
+  <label class="form-label">See also (must be an URL)</label>
+  <input
+    type="text"
+    class="form-control"
+    name="seeAlso"
+    value="<%= locals.data && data.seeAlso %>"
+  />      
 </div>
 <div id="metadata-container" class="mb-3">
   <label class="form-label">Metadata</label>

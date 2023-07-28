@@ -1,13 +1,17 @@
-declare module "iiif-processor" {
+declare module 'iiif-processor' {
   namespace IIIF {
     class Error {
-      constructor(message: string, params: { statusCode: number });
+      constructor(
+        message: string,
+        params: { statusCode: number }
+      );
     }
   }
   class Processor {
     constructor(
       url: string,
-      streamImageFromFile: (params: { id: string }) => any
+      streamImageFromFile: (params: { id: string }) => any,
+      opts = {}
     );
     execute: () => Promise<any>;
   }

@@ -7,13 +7,16 @@
 <script>
   (function () {
     IIIFCurationViewerEmbedded({
-      id: "image_canvas",
+      id: 'image_canvas',
       data: {
-        manifest: "/manifests/<%= manifest.id %>.json",
+        manifest:
+          '/api/presentation/2/<%= manifest.id %>.json',
       },
     });
   })();
 </script>
-<a href="/manifests/<%= manifest.id %>.json" target="_blank"
+<a
+  href="/api/presentation/2/<%= manifest.id %>.json"
+  target="_blank"
   >IIIF Curation Viewerで開く</a
 >

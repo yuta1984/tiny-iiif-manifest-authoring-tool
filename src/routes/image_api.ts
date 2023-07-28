@@ -1,35 +1,46 @@
-import express from "express";
-import { Processor, IIIF } from "iiif-processor";
-import fs from "fs";
-import path from "path";
+import express from 'express';
+import { Processor, IIIF } from 'iiif-processor';
+import fs from 'fs';
+import path from 'path';
+import { IIIF_URI_PREFIX } from '../config';
 
 function createRouter(version: number) {
   const streamImageFromFile = (params: { id: string }) => {
-    console.log("streamImageFromFile");
-    const iiifImagePath = path.join(__dirname, "../../images/ptiff");
+    console.log('streamImageFromFile');
+    const iiifImagePath = path.join(
+      __dirname,
+      '../../images/ptiff'
+    );
     console.log(iiifImagePath);
     const file = path.join(iiifImagePath, params.id);
     if (!fs.existsSync(file)) {
-      throw new IIIF.Error("Not Found", { statusCode: 404 });
+      throw new IIIF.Error('Not Found', {
+        statusCode: 404,
+      });
     }
     return fs.createReadStream(file);
   };
 
   const render = async (req: any, res: any) => {
     if (!req.params?.filename == null) {
-      req.params.filename = "info.json";
+      req.params.filename = 'info.json';
     }
 
     try {
-      const iiifUrl = `${req.protocol}://${req.get("host")}/iiif/${version}${
-        req.path
-      }`;
-      const iiifProcessor = new Processor(iiifUrl, streamImageFromFile);
+      const iiifUrl = `${IIIF_URI_PREFIX}api/iiif/${version}${req.path}`;
+      const iiifProcessor = new Processor(
+        iiifUrl,
+        streamImageFromFile,
+        {
+          iiifVersion: version,
+          pathPrefix: `api/iiif/${version}/`,
+        }
+      );
       console.log(req.url);
       const result = await iiifProcessor.execute();
       return res
-        .set("Content-Type", result.contentType)
-        .set("Link", [
+        .set('Content-Type', result.contentType)
+        .set('Link', [
           `<${result.canonicalLink}>;rel="canonical"`,
           `<${result.profileLink}>;rel="profile"`,
         ])
@@ -45,16 +56,21 @@ function createRouter(version: number) {
 
   // Respond with 204 NO CONTENT to all OPTIONS requests
   router.options(/^.*$/, (_req, res) => {
-    res.status(204).send("");
+    res.status(204).send('');
   });
 
-  router.get("/", function (_req, res) {
-    return res.status(200).send(`IIIF v${version}.x endpoint OK`);
+  router.get('/', function (_req, res) {
+    return res
+      .status(200)
+      .send(`IIIF v${version}.x endpoint OK`);
   });
 
-  router.get("/:id", render);
-  router.get("/:id/info.json", render);
-  router.get("/:id/:region/:size/:rotation/:filename", render);
+  router.get('/:id', render);
+  router.get('/:id/info.json', render);
+  router.get(
+    '/:id/:region/:size/:rotation/:filename',
+    render
+  );
 
   return router;
 }

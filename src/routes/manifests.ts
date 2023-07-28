@@ -131,4 +131,14 @@ router.get('/', checkAuth, async (req, res) => {
   }
 });
 
+router.get('/:id/browse', async (req, res) => {
+  const id = req.params.id;
+  try {
+    const manifest = await getManifestById(id);
+    return res.render('manifests/browse', { manifest });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 export default router;

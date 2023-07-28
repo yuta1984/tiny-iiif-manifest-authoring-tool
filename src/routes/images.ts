@@ -4,6 +4,12 @@ import { open } from 'sqlite';
 import imagemagick from 'imagemagick';
 import bufferImageSize from 'buffer-image-size';
 import { checkAuth } from '../utils/auth';
+import {
+  addImage,
+  deleteImage,
+  getImage,
+  getManifestById,
+} from '../utils/db';
 
 sqlite3.verbose();
 
@@ -65,56 +71,90 @@ router.get('/:id/images', async (req, res) => {
   return res.render('images/index', { manifest, images });
 });
 
-// accept image uploads and convert them to pyramid tiffs
+type ImageUpload = {
+  name: string;
+  data: Buffer;
+  mimetype: string;
+  size: number;
+  md5: string;
+  mv: (path: string) => void;
+};
+
 router.post('/:id/images', checkAuth, async (req, res) => {
-  const db = await getDB();
   const id = req.params.id;
-  console.log(req.files!.images);
-  // insert images into db
-  const images = req.files!.images as {
-    name: string;
-    data: Buffer;
-    mimetype: string;
-    size: number;
-    md5: string;
-    mv: (path: string) => void;
-  }[];
-  const promises = images.map(async (image: any) => {
-    const { size, data, md5 } = image;
-    const hash = md5;
-    const dimension = bufferImageSize(data);
-    image.mv(
-      `${__dirname}/../../images/original/${hash}.jpg`,
-      async (err: any) => {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log('uploaded: ', hash);
-          console.log('converting to ptiff...');
-          await convertToPtiff(hash);
-          console.log('done converting to ptiff');
-          await updateImageStatus(hash);
-          console.log('done updating image status');
-        }
-      }
+  const user = req.user!;
+  // delete button was clicked
+  if (req.body.deleteImage) {
+    const name = req.body.deleteImage;
+    // get image
+    const image = await getImage(name);
+    // check if image exists
+    if (image === undefined) {
+      return res.status(404).send('Image not found');
+    }
+    // check if user is authorized to delete image
+    if (image.uid !== user.id) {
+      return res.status(403).send('Forbidden');
+    }
+    // delete image from db
+    await deleteImage(name);
+    // delete image from filesystem
+    const fs = require('fs');
+    fs.unlinkSync(
+      `${__dirname}/../../images/original/${name}.jpg`
     );
-    const sql = `
-      INSERT INTO images (name, size, width, height, manifestId, uid, status, createdAt)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-    return await db.run(sql, [
-      hash,
-      size,
-      dimension.width,
-      dimension.height,
-      id,
-      'hashimoto',
-      'converting',
-      new Date().getTime(),
-    ]);
-  });
-  await Promise.all(promises);
-  res.redirect(`/manifests/${id}/images`);
+    fs.unlinkSync(
+      `${__dirname}/../../images/ptiff/${name}.tif`
+    );
+    return res.redirect(`/manifests/${id}/images`);
+    // submit button was clicked
+  } else {
+    // get manifest
+    const manifest = await getManifestById(id);
+    // check if manifest exists
+    if (!manifest) {
+      return res.status(404).send('Manifest not found');
+    }
+    // check if user is authorized to upload images to manifest
+    if (manifest.uid !== user.id) {
+      return res.status(403).send('Forbidden');
+    }
+    // insert images into db
+    const images = Array.isArray(req.files!.images)
+      ? (req.files!.images as ImageUpload[])
+      : [req.files!.images as ImageUpload];
+    const promises = images.map((image: any) => {
+      const { size, data, md5 } = image;
+      const hash = md5;
+      const dimension = bufferImageSize(data);
+      image.mv(
+        `${__dirname}/../../images/original/${hash}.jpg`,
+        async (err: any) => {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log('uploaded: ', hash);
+            console.log('converting to ptiff...');
+            await convertToPtiff(hash);
+            console.log('done converting to ptiff');
+            await updateImageStatus(hash);
+            console.log('done updating image status');
+          }
+        }
+      );
+      return addImage({
+        name: hash,
+        uid: user.id,
+        size,
+        width: dimension.width,
+        height: dimension.height,
+        manifestId: id,
+        status: 'uploading',
+      });
+    });
+    await Promise.all(promises);
+    return res.redirect(`/manifests/${id}/images`);
+  }
 });
 
 export default router;

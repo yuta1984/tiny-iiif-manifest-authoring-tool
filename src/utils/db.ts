@@ -1,6 +1,6 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
-import { Manifest, User } from '../types';
+import { Manifest, User, Image } from '../types';
 
 sqlite3.verbose();
 
@@ -127,4 +127,45 @@ export async function getImagesByManifestId(id: string) {
     WHERE manifestId = ?
   `;
   return await db.all<Manifest[]>(sql, id);
+}
+
+export async function addImage(
+  i: Omit<Image, 'id' | 'createdAt'>
+) {
+  const db = await getDB();
+  const sql = `
+    INSERT INTO images
+    (name, uid, size, width, height, manifestId, status, createdAt)
+    VALUES
+    (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+  const time = new Date().getTime();
+  return await db.run(sql, [
+    i.name,
+    i.uid,
+    i.size,
+    i.width,
+    i.height,
+    i.manifestId,
+    i.status,
+    time,
+  ]);
+}
+
+export async function deleteImage(name: string) {
+  const db = await getDB();
+  const sql = `
+    DELETE FROM images
+    WHERE name = ?
+  `;
+  await db.run(sql, name);
+}
+
+export async function getImage(name: string) {
+  const db = await getDB();
+  const sql = `
+    SELECT * FROM images
+    WHERE name = ?
+  `;
+  return await db.get<Image>(sql, name);
 }
