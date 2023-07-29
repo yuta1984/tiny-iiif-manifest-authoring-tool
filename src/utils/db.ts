@@ -37,6 +37,16 @@ export async function getManifestById(id: string) {
   return m ? restoreMetadataArray(m) : undefined;
 }
 
+export async function getAllManifestsOrderByCreatedAt() {
+  const db = await getDB();
+  const sql = `
+    SELECT * FROM manifests
+    ORDER BY createdAt DESC
+  `;
+  const manifests = await db.all<Manifest[]>(sql);
+  return manifests.map(restoreMetadataArray);
+}
+
 export async function getAllManifestsByUid(uid: string) {
   const db = await getDB();
   const sql = `

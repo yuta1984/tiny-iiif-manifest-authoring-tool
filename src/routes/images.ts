@@ -68,7 +68,11 @@ router.get('/:id/images', async (req, res) => {
     id
   );
   db.close();
-  return res.render('images/index', { manifest, images });
+  return res.render('images/index', {
+    manifest,
+    images,
+    flash: req.flash(),
+  });
 });
 
 type ImageUpload = {
@@ -106,6 +110,7 @@ router.post('/:id/images', checkAuth, async (req, res) => {
     fs.unlinkSync(
       `${__dirname}/../../images/ptiff/${name}.tif`
     );
+    req.flash('info', 'Image deleted.');
     return res.redirect(`/manifests/${id}/images`);
     // submit button was clicked
   } else {
@@ -153,6 +158,7 @@ router.post('/:id/images', checkAuth, async (req, res) => {
       });
     });
     await Promise.all(promises);
+    req.flash('info', 'Images uploaded.');
     return res.redirect(`/manifests/${id}/images`);
   }
 });

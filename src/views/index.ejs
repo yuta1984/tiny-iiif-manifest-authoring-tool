@@ -1,1 +1,50 @@
-<p><%= flash %></p>
+<h2>List of IIIF manifests</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">Owner</th>
+      <th scope="col">Label</th>
+      <th scope="col"><Del></Del>Description</th>
+      <th scope="col"><Del></Del>Created at</th>      
+      <th scope="col"><Del></Del>Updated at</th>
+      <th scope="col"><Del></Del>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% manifests.forEach((manifest) => { %>
+    <tr>
+      <th scope="row">
+        <a href="/api/presentation/2/<%= manifest.id %>.json" target="_blank"><%= manifest.id %></th></a>
+      <td><%= manifest.uid %></td>
+      <td><%= manifest.label %></td>
+      <td><%= manifest.description %></td>        
+      <td><%= new Date(manifest.createdAt).toISOString() %></td>
+      <td><%= new Date(manifest.updatedAt).toISOString() %></td>
+      <td>
+        <div class="dropdown">
+          <button
+            class="btn btn-sm btn-primary dropdown-toggle"
+            type="button"
+            id="dropdownMenuButton1"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Actions
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+               <li>
+              <a
+                class="dropdown-item"
+                href="/manifests/<%= manifest.id %>/browse"
+                >Browse</a
+              >
+            </li>       
+          </ul>
+        </div>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>

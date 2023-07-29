@@ -52,7 +52,7 @@ passport.deserializeUser<User>(function (user, cb) {
 });
 
 router.get('/login', (req, res) => {
-  res.render('login');
+  res.render('login', { flash: req.flash() });
 });
 
 router.get('/logout', (req, res, next) => {
@@ -60,6 +60,7 @@ router.get('/logout', (req, res, next) => {
     if (err) {
       return next(err);
     }
+    req.flash('info', 'You have been logged out.');
     res.redirect('/');
   });
 });

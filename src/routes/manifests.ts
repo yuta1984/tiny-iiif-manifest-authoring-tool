@@ -19,7 +19,6 @@ const formCheck = [
   check('label').not().isEmpty().trim().escape(),
   check('description').not().isEmpty().trim().escape(),
   check('attribution').not().isEmpty().trim().escape(),
-  check('license').not().isEmpty().trim().escape(),
 ];
 
 router.post(
@@ -28,14 +27,27 @@ router.post(
   ...formCheck,
   async (req, res) => {
     const uid = req.user!.id;
-    console.log(req.body);
+    // check if manifest id already exists
+    const existing = await getManifestById(req.body.id);
+    if (existing) {
+      return res.render('manifests/new', {
+        errors: [
+          {
+            path: 'ID',
+            msg: 'This manifest ID is already taken. Try different one.',
+          },
+        ],
+        data: req.body,
+        flash: req.flash(),
+      });
+    }
     // validate form
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      console.log(errors);
       return res.render('manifests/new', {
         errors: errors.array(),
         data: req.body,
+        flash: req.flash(),
       });
     }
     const manifest: Manifest = {
@@ -55,40 +67,41 @@ router.post(
     };
     try {
       await addManifest(manifest);
+      req.flash('info', 'Manifest created.');
       return res.redirect(`/manifests/`);
     } catch (err) {
       console.log(err);
       return res.render('manifests/new', {
         errors: err,
         data: req.body,
+        flash: req.flash(),
       });
     }
   }
 );
 
 router.get('/new', checkAuth, (req, res) => {
-  return res.render('manifests/new', { data: {} });
+  return res.render('manifests/new', {
+    data: { flash: req.flash() },
+  });
 });
 
-router.get(
-  '/:id/edit',
-  checkAuth,
-
-  async (req, res) => {
-    const id = req.params.id;
-    // validate form
-    try {
-      const manifest = await getManifestById(id);
-      return res.render('manifests/edit', { manifest, id });
-    } catch (err) {
-      console.log(err);
-      return res.render('manifests/edit', {
-        manifest: {},
-        id,
-      });
-    }
+router.get('/:id/edit', checkAuth, async (req, res) => {
+  const id = req.params.id;
+  // validate form
+  try {
+    const manifest = await getManifestById(id);
+    req.flash('info', 'Manifest updated.');
+    return res.render('manifests/edit', { manifest, id });
+  } catch (err) {
+    console.log(err);
+    return res.render('manifests/edit', {
+      manifest: {},
+      id,
+      flash: req.flash(),
+    });
   }
-);
+});
 
 router.post('/:id', checkAuth, ...formCheck, (req, res) => {
   const id = req.params!.id;
@@ -125,7 +138,10 @@ router.get('/', checkAuth, async (req, res) => {
   const uid = req.user?.id!;
   try {
     const manifests = await getAllManifestsByUid(uid);
-    return res.render('manifests/index', { manifests });
+    return res.render('manifests/index', {
+      manifests,
+      flash: req.flash(),
+    });
   } catch (err) {
     console.log(err);
   }
@@ -135,7 +151,10 @@ router.get('/:id/browse', async (req, res) => {
   const id = req.params.id;
   try {
     const manifest = await getManifestById(id);
-    return res.render('manifests/browse', { manifest });
+    return res.render('manifests/browse', {
+      manifest,
+      flash: req.flash(),
+    });
   } catch (err) {
     console.log(err);
   }

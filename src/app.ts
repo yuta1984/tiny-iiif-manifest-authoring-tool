@@ -10,6 +10,8 @@ import passport from 'passport';
 import flash from 'connect-flash';
 import fileUpload from 'express-fileupload';
 import { PORT } from './config';
+import { checkAuth } from './utils/auth';
+import { getAllManifestsOrderByCreatedAt } from './utils/db';
 
 const app = express();
 
@@ -52,9 +54,18 @@ app.use(
     limits: { fileSize: 50 * 1024 * 1024 },
   })
 );
+// pass user to all views
+app.use((req, res, next) => {
+  res.locals.user = req.user;
+  next();
+});
 
-app.get('/', (req, res) => {
-  return res.redirect('/manifests');
+app.get('/', checkAuth, async (req, res) => {
+  const manifests = await getAllManifestsOrderByCreatedAt();
+  return res.render('index', {
+    manifests,
+    flash: req.flash(),
+  });
 });
 
 // routes
