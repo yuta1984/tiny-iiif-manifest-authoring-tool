@@ -39,14 +39,12 @@ passport.use(
 passport.serializeUser<User>(function (user, cb) {
   process.nextTick(function () {
     const appUser = user as User;
-    console.log('serialization', user);
     return cb(null, appUser);
   });
 });
 
 passport.deserializeUser<User>(function (user, cb) {
   process.nextTick(function () {
-    console.log('deserialization', user);
     return cb(null, user);
   });
 });
