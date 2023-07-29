@@ -29,7 +29,7 @@ router.get('/2/:id.json', async (req, res) => {
   json.logo = manifest.logo;
   json.license = manifest.license;
   json.seeAlso = manifest.seeAlso;
-  json.metadata = manifest.metadata;
+  json.metadata = manifest.metadata || [];
   json.sequences = [
     {
       '@type': 'sc:Sequence',
