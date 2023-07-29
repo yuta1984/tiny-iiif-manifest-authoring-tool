@@ -80,7 +80,7 @@ router.post(
   }
 );
 
-router.get('/new', checkAuth, (req, res) => {
+router.get('/new', checkAuth, ...formCheck, (req, res) => {
   return res.render('manifests/new', {
     data: { flash: req.flash() },
   });
@@ -88,11 +88,13 @@ router.get('/new', checkAuth, (req, res) => {
 
 router.get('/:id/edit', checkAuth, async (req, res) => {
   const id = req.params.id;
-  // validate form
   try {
     const manifest = await getManifestById(id);
-    req.flash('info', 'Manifest updated.');
-    return res.render('manifests/edit', { manifest, id });
+    return res.render('manifests/edit', {
+      manifest,
+      id,
+      flash: req.flash(),
+    });
   } catch (err) {
     console.log(err);
     return res.render('manifests/edit', {
@@ -109,7 +111,12 @@ router.post('/:id', checkAuth, ...formCheck, (req, res) => {
   // validate form
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.redirect(`/manifests/${id}/edit`);
+    req.body.id = id;
+    return res.render('manifests/edit', {
+      errors: errors.array(),
+      manifest: req.body,
+      flash: req.flash(),
+    });
   }
   const manifest: Partial<Manifest> = {
     id,
@@ -130,6 +137,7 @@ router.post('/:id', checkAuth, ...formCheck, (req, res) => {
   } catch (err) {
     console.log(err);
   } finally {
+    req.flash('info', 'Manifest updated.');
     return res.redirect(`/manifests/${id}/edit`);
   }
 });
