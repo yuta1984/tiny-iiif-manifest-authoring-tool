@@ -35,7 +35,7 @@ npm add_user [username]
 # start web server
 IIIF_URI_PREFIX="https://yourdomain.com” PORT=3000 npm run serve
 ```
-The environment variable IIIF_URI_PREFIX is used for properties like @id in the IIIF Manifest files.
+The environment variable IIIF_URI_PREFIX will be used as a prefix for properties like @id in the IIIF Manifest files.
 
 # License
 MIT License
