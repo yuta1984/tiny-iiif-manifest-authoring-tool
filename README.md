@@ -7,7 +7,7 @@ IIIF is an extremely useful framework for publishing image resources in an inter
 This web application, based on Express.js, enables individuals and small groups to easily publish IIIF resources through a simple set of steps. Specifically, it provides a straightforward web interface for the following tasks:
 
 1. Upload images and publish them in the IIIF Image format (mostly achieved by [iiif-processor](https://github.com/samvera/node-iiif) ).
-2. Editing IIIF manifests that reference these images.
+2. Editing and publishing IIIF manifests that reference these images.
 
 # Dependencies
 To use this application, you need to have the following installed:
