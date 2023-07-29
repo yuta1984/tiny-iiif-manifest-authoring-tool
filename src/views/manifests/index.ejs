@@ -1,4 +1,4 @@
-<h2>My IIIF manifests</h2>
+<h2>Your IIIF manifests</h2>
 <a href="/manifests/new" class="btn btn-primary">Add new manifest</a>
 <table class="table">
   <thead>
@@ -38,7 +38,7 @@
               <a
                 class="dropdown-item"
                 href="/manifests/<%= manifest.id %>/browse"
-                >Browse</a
+                >Browse in Curation Viewer</a
               >
             </li>
             <li>
@@ -53,7 +53,13 @@
                 >Manage images</a
               >
             </li>
-            <li><a class="dropdown-item" href="#">Delete</a></li>
+            <li>
+              <form
+                action="/manifests/<%= manifest.id %>"
+                method="POST">
+                  <button type="submit" name="_method" value="DELETE" class="dropdown-item btn btn-link">Delete</button>
+              </form>
+            </li>
           </ul>
         </div>
       </td>
@@ -61,4 +67,3 @@
     <% }) %>
   </tbody>
 </table>
-
