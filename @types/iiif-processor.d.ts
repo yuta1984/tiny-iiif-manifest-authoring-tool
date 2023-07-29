@@ -11,7 +11,7 @@ declare module 'iiif-processor' {
     constructor(
       url: string,
       streamImageFromFile: (params: { id: string }) => any,
-      opts = {}
+      opts: any
     );
     execute: () => Promise<any>;
   }
