@@ -3,6 +3,7 @@ import { check, validationResult } from 'express-validator';
 import { checkAuth } from '../utils/auth';
 import {
   addManifest,
+  deleteManifest,
   getAllManifestsByUid,
   getManifestById,
   updateManifest,
@@ -61,7 +62,7 @@ router.post(
       logo: req.body.logo,
       license: req.body.license,
       seeAlso: req.body.seeAlso,
-      metadata: req.body.metadata,
+      metadata: req.body.metadata || [],
       updatedAt: Date.now(),
       createdAt: Date.now(),
     };
@@ -105,42 +106,55 @@ router.get('/:id/edit', checkAuth, async (req, res) => {
   }
 });
 
-router.post('/:id', checkAuth, ...formCheck, (req, res) => {
-  const id = req.params!.id;
-  console.log('updating manifest: ', id);
-  // validate form
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    req.body.id = id;
-    return res.render('manifests/edit', {
-      errors: errors.array(),
-      manifest: req.body,
-      flash: req.flash(),
-    });
+router.post(
+  '/:id',
+  checkAuth,
+  ...formCheck,
+  async (req, res) => {
+    const id = req.params!.id;
+    const method = req.body._method;
+    // if delete
+    if (method === 'DELETE') {
+      console.log('deleting manifest: ', id);
+      await deleteManifest(id);
+      req.flash('info', 'Manifest deleted.');
+      return res.redirect(`/manifests/`);
+    }
+    console.log('updating manifest: ', id);
+    // validate form
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      req.body.id = id;
+      return res.render('manifests/edit', {
+        errors: errors.array(),
+        manifest: req.body,
+        flash: req.flash(),
+      });
+    }
+    const manifest: Partial<Manifest> = {
+      id,
+      uid: req.user!.id,
+      label: req.body.label,
+      description: req.body.description,
+      attribution: req.body.attribution,
+      viewingDirection: req.body.viewingDirection,
+      viewingHint: req.body.viewingHint,
+      logo: req.body.logo,
+      license: req.body.license,
+      seeAlso: req.body.seeAlso,
+      metadata: req.body.metadata || [],
+      updatedAt: Date.now(),
+    };
+    try {
+      updateManifest(manifest);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      req.flash('info', 'Manifest updated.');
+      return res.redirect(`/manifests/${id}/edit`);
+    }
   }
-  const manifest: Partial<Manifest> = {
-    id,
-    uid: req.user!.id,
-    label: req.body.label,
-    description: req.body.description,
-    attribution: req.body.attribution,
-    viewingDirection: req.body.viewingDirection,
-    viewingHint: req.body.viewingHint,
-    logo: req.body.logo,
-    license: req.body.license,
-    seeAlso: req.body.seeAlso,
-    metadata: req.body.metadata,
-    updatedAt: Date.now(),
-  };
-  try {
-    updateManifest(manifest);
-  } catch (err) {
-    console.log(err);
-  } finally {
-    req.flash('info', 'Manifest updated.');
-    return res.redirect(`/manifests/${id}/edit`);
-  }
-});
+);
 
 router.get('/', checkAuth, async (req, res) => {
   const uid = req.user?.id!;

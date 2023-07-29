@@ -123,11 +123,18 @@ export async function updateManifest(m: Partial<Manifest>) {
 
 export async function deleteManifest(id: string) {
   const db = await getDB();
-  const sql = `
+  // delete images first
+  const sql1 = `
+    DELETE FROM images
+    WHERE manifestId = ?
+  `;
+  await db.run(sql1, id);
+  // delete manifest
+  const sql2 = `
     DELETE FROM manifests
     WHERE id = ?
   `;
-  await db.run(sql, id);
+  return await db.run(sql2, id);
 }
 
 export async function getImagesByManifestId(id: string) {
