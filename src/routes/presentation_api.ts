@@ -4,6 +4,7 @@ import {
   getManifestById,
 } from '../utils/db';
 import { IIIF_URI_PREFIX } from '../config';
+import { manifestURI } from '../utils/uri';
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ router.get('/2/:id.json', async (req, res) => {
   if (!manifest) {
     return res.status(404).json({ error: 'Not found' });
   }
-  const manifestId = `${IIIF_URI_PREFIX}manifests/2/${id}.json`;
+  const manifestId = manifestURI(id, 2);
   const images = await getImagesByManifestId(id);
   const json: any = {};
   json['@context'] =
