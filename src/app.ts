@@ -9,7 +9,7 @@ import PresentationAPIRouter from './routes/presentation_api';
 import passport from 'passport';
 import flash from 'connect-flash';
 import fileUpload from 'express-fileupload';
-import { PORT } from './config';
+import { IIIF_BASE_URL, PORT } from './config';
 import { checkAuth } from './utils/auth';
 import { getAllManifestsOrderByCreatedAt } from './utils/db';
 import dayjs from 'dayjs';
@@ -79,6 +79,7 @@ app.get('/', checkAuth, async (req, res) => {
         'YYYY-MM-DD HH:mm:ss'
       );
     },
+    IIIF_BASE_URL,
   });
 });
 
