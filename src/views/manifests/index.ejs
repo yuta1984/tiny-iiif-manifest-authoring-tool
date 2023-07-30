@@ -20,8 +20,8 @@
       <td><%= manifest.uid %></td>
       <td><%= manifest.label %></td>
       <td><%= manifest.description %></td>        
-      <td><%= new Date(manifest.createdAt).toISOString() %></td>
-      <td><%= new Date(manifest.updatedAt).toISOString() %></td>
+      <td><%= formatDate(manifest.createdAt) %></td>
+      <td><%= formatDate(manifest.updatedAt) %></td>
       <td>
         <div class="dropdown">
           <button

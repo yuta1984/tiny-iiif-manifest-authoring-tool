@@ -12,6 +12,7 @@ import fileUpload from 'express-fileupload';
 import { PORT } from './config';
 import { checkAuth } from './utils/auth';
 import { getAllManifestsOrderByCreatedAt } from './utils/db';
+import dayjs from 'dayjs';
 
 const app = express();
 
@@ -65,6 +66,11 @@ app.get('/', checkAuth, async (req, res) => {
   return res.render('index', {
     manifests,
     flash: req.flash(),
+    formatDate: (date: number) => {
+      return dayjs(new Date(date)).format(
+        'YYYY-MM-DD HH:mm:ss'
+      );
+    },
   });
 });
 
