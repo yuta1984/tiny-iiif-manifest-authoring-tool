@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "npx ts-node src/app.ts",
+    "start": "npx ts-node src/app.ts",
     "watch": "npx nodemon",
     "init_db": "npx ts-node scripts/init_db.ts",
     "add_user": "npx ts-node scripts/add_user.ts",
