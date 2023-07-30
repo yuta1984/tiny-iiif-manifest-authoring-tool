@@ -10,6 +10,7 @@ import {
 } from '../utils/db';
 import { Manifest } from '../types';
 import dayjs from 'dayjs';
+import logger from '../utils/logger';
 
 const router = express.Router();
 
@@ -171,7 +172,7 @@ router.get('/', checkAuth, async (req, res) => {
       },
     });
   } catch (err) {
-    console.log(err);
+    logger.error(err);
   }
 });
 
@@ -184,7 +185,7 @@ router.get('/:id/browse', async (req, res) => {
       flash: req.flash(),
     });
   } catch (err) {
-    console.log(err);
+    logger.error(err);
   }
 });
 

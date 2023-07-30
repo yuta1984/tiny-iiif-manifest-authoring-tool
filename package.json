@@ -46,6 +46,7 @@
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
     "sqlite": "^5.0.1",
-    "sqlite3": "^5.1.6"
+    "sqlite3": "^5.1.6",
+    "winston": "^3.10.0"
   }
 }

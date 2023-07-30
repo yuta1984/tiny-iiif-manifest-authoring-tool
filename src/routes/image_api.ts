@@ -3,15 +3,14 @@ import { Processor, IIIF } from 'iiif-processor';
 import fs from 'fs';
 import path from 'path';
 import { IIIF_BASE_URL } from '../config';
+import logger from '../utils/logger';
 
 function createRouter(version: number) {
   const streamImageFromFile = (params: { id: string }) => {
-    console.log('streamImageFromFile');
     const iiifImagePath = path.join(
       __dirname,
       '../../images/ptiff'
     );
-    console.log(iiifImagePath);
     const file = path.join(iiifImagePath, params.id);
     if (!fs.existsSync(file)) {
       throw new IIIF.Error('Not Found', {
@@ -36,7 +35,6 @@ function createRouter(version: number) {
           pathPrefix: `api/iiif/${version}/`,
         }
       );
-      console.log(req.url);
       const result = await iiifProcessor.execute();
       return res
         .set('Content-Type', result.contentType)
@@ -47,7 +45,7 @@ function createRouter(version: number) {
         .status(200)
         .send(result.body);
     } catch (err) {
-      console.log(err);
+      logger.error(err);
       return res.status(502);
     }
   };

@@ -13,6 +13,7 @@ import { PORT } from './config';
 import { checkAuth } from './utils/auth';
 import { getAllManifestsOrderByCreatedAt } from './utils/db';
 import dayjs from 'dayjs';
+import logger from './utils/logger';
 
 const app = express();
 
@@ -45,6 +46,13 @@ app.use(
     cookie: { secure: false },
   })
 );
+// logging
+app.use((req, res, next) => {
+  logger.info(
+    `[${req.method}] ${req.originalUrl} ${req.ip}`
+  );
+  next();
+});
 // authentication
 app.use(passport.session());
 // flash
@@ -83,5 +91,5 @@ app.use('/api/iiif/3', IIIFRouter(3));
 app.use('/api/presentation/', PresentationAPIRouter);
 
 app.listen(PORT, () => {
-  console.log(`Start on port ${PORT}.`);
+  logger.info(`Start on port ${PORT}.`);
 });

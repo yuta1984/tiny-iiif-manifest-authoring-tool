@@ -4,6 +4,7 @@ import LocalStrategy from 'passport-local';
 import crypto from 'crypto';
 import { User } from '../types';
 import { getUserById } from '../utils/db';
+import logger from '../utils/logger';
 
 const router = express.Router();
 
@@ -28,6 +29,7 @@ passport.use(
           });
         }
         // return user
+        logger.info('logged in successfully', { user });
         return done(null, user);
       } catch (err) {
         return done(err);

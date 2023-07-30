@@ -10,6 +10,7 @@ import {
   getImage,
   getManifestById,
 } from '../utils/db';
+import logger from '../utils/logger';
 
 sqlite3.verbose();
 
@@ -37,6 +38,9 @@ const convertToPtiff = async (name: string) => {
       ],
       (err, stdout) => {
         if (err) {
+          logger.error("couldn't convert to ptiff", {
+            error: err,
+          });
           reject(err);
         }
         resolve(stdout);
@@ -59,20 +63,25 @@ const updateImageStatus = async (name: string) => {
 router.get('/:id/images', async (req, res) => {
   const db = await getDB();
   const id = req.params.id;
-  const manifest = await db.get(
-    'SELECT * FROM manifests WHERE id = ?',
-    id
-  );
-  const images = await db.all(
-    'SELECT * FROM images WHERE manifestId = ?',
-    id
-  );
-  db.close();
-  return res.render('images/index', {
-    manifest,
-    images,
-    flash: req.flash(),
-  });
+  try {
+    const manifest = await db.get(
+      'SELECT * FROM manifests WHERE id = ?',
+      id
+    );
+    const images = await db.all(
+      'SELECT * FROM images WHERE manifestId = ?',
+      id
+    );
+    return res.render('images/index', {
+      manifest,
+      images,
+      flash: req.flash(),
+    });
+  } catch (err) {
+    logger.error(err);
+  } finally {
+    db.close();
+  }
 });
 
 type ImageUpload = {
@@ -94,10 +103,12 @@ router.post('/:id/images', checkAuth, async (req, res) => {
     const image = await getImage(name);
     // check if image exists
     if (image === undefined) {
+      logger.error('Image not found', { name });
       return res.status(404).send('Image not found');
     }
     // check if user is authorized to delete image
     if (image.uid !== user.id) {
+      logger.error('Forbidden', { user, image });
       return res.status(403).send('Forbidden');
     }
     // delete image from db
@@ -136,14 +147,17 @@ router.post('/:id/images', checkAuth, async (req, res) => {
         `${__dirname}/../../images/original/${hash}.jpg`,
         async (err: any) => {
           if (err) {
-            console.log(err);
+            logger.error("couldn't upload image", {
+              error: err,
+            });
           } else {
-            console.log('uploaded: ', hash);
-            console.log('converting to ptiff...');
+            logger.info('image uploaded', { hash });
             await convertToPtiff(hash);
-            console.log('done converting to ptiff');
+            logger.info('image converted to ptiff', {
+              hash,
+            });
             await updateImageStatus(hash);
-            console.log('done updating image status');
+            logger.info('image status updated', { hash });
           }
         }
       );
