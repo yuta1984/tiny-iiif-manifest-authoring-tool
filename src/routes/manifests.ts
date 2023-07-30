@@ -1,3 +1,4 @@
+import { IIIF_BASE_URL } from './../config';
 import express from 'express';
 import { check, validationResult } from 'express-validator';
 import { checkAuth } from '../utils/auth';
@@ -170,6 +171,7 @@ router.get('/', checkAuth, async (req, res) => {
           'YYYY-MM-DD HH:mm:ss'
         );
       },
+      IIIF_BASE_URL,
     });
   } catch (err) {
     logger.error(err);
