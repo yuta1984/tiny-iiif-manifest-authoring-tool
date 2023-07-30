@@ -50,7 +50,7 @@ npm run init_db
 npm add_user [username]
 
 # start web server
-IIIF_BASE_URL="https://yourdomain.com/” PORT=3000 npm start
+IIIF_BASE_URL=https://yourdomain.com/ PORT=3000 npm start
 
 # you may daemonize the server with pm2. See: https://pm2.keymetrics.io/docs/usage/quick-start/
 npm install -g pm2
