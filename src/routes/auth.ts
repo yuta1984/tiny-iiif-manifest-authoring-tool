@@ -3,8 +3,12 @@ import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import crypto from 'crypto';
 import { User } from '../types';
-import { getUserById } from '../utils/db';
+import {
+  getUserById,
+  updateUserPassword,
+} from '../utils/db';
 import logger from '../utils/logger';
+import { checkAuth } from '../utils/auth';
 
 const router = express.Router();
 
@@ -52,7 +56,7 @@ passport.deserializeUser<User>(function (user, cb) {
 });
 
 router.get('/login', (req, res) => {
-  res.render('login', { flash: req.flash() });
+  res.render('auth/login', { flash: req.flash() });
 });
 
 router.get('/logout', (req, res, next) => {
@@ -71,6 +75,70 @@ router.post(
     successRedirect: '/',
     failureRedirect: '/login',
   })
+);
+
+router.get('/change_password', checkAuth, (req, res) => {
+  res.render('auth/change_password', {
+    flash: req.flash(),
+  });
+});
+
+router.post(
+  '/change_password',
+  checkAuth,
+  async (req, res) => {
+    const user = req.user!;
+    const oldPassword = req.body.oldPassword;
+    const newPassword = req.body.newPassword;
+    const newPassword2 = req.body.newPassword2;
+    // check if old password is correct
+    const digest = crypto
+      .createHash('sha256')
+      .update(oldPassword + user.salt)
+      .digest('hex');
+    if (digest !== user.hash) {
+      req.flash('danger', 'Incorrect password.');
+      logger.error('Incorrect password', { user });
+      return res.redirect('/change_password');
+    }
+    // check if new password is valid
+    if (newPassword.length < 4) {
+      req.flash(
+        'danger',
+        'New password must be at least 4 characters long.'
+      );
+      logger.error('New password too short', { user });
+      return res.redirect('/change_password');
+    }
+    // check if new passwords match
+    if (newPassword !== newPassword2) {
+      req.flash('danger', 'New passwords do not match.');
+      logger.error('New passwords do not match', { user });
+      return res.redirect('/change_password');
+    }
+    // check if new password is different from old password
+    if (oldPassword === newPassword) {
+      req.flash(
+        'danger',
+        'New password must be different.'
+      );
+      logger.error('New password must be different', {
+        user,
+      });
+      return res.redirect('/change_password');
+    }
+    // update password
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hash = crypto
+      .createHash('sha256')
+      .update(newPassword + salt)
+      .digest('hex');
+    // update user
+    await updateUserPassword(user.id, hash, salt);
+    logger.info('Password changed', { user });
+    req.flash('info', 'Password changed.');
+    return res.redirect('/');
+  }
 );
 
 export default router;

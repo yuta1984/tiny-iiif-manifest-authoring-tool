@@ -20,6 +20,21 @@ export async function getUserById(id: string) {
   return await db.get<User>(sql, id);
 }
 
+export async function updateUserPassword(
+  id: string,
+  hash: string,
+  salt: string
+) {
+  const db = await getDB();
+  const sql = `
+    UPDATE users
+    SET hash = ?,
+    salt = ?
+    WHERE id = ?
+  `;
+  return await db.run(sql, hash, salt, id);
+}
+
 function restoreMetadataArray(m: Manifest) {
   if (m.metadata && typeof m.metadata === 'string') {
     m.metadata = JSON.parse(m.metadata);
