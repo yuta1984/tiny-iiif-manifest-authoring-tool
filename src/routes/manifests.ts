@@ -9,6 +9,7 @@ import {
   updateManifest,
 } from '../utils/db';
 import { Manifest } from '../types';
+import dayjs from 'dayjs';
 
 const router = express.Router();
 
@@ -163,6 +164,11 @@ router.get('/', checkAuth, async (req, res) => {
     return res.render('manifests/index', {
       manifests,
       flash: req.flash(),
+      formatDate: (date: number) => {
+        return dayjs(new Date(date)).format(
+          'YYYY-MM-DD HH:mm:ss'
+        );
+      },
     });
   } catch (err) {
     console.log(err);

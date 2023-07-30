@@ -2,7 +2,7 @@ import express from 'express';
 import { Processor, IIIF } from 'iiif-processor';
 import fs from 'fs';
 import path from 'path';
-import { IIIF_URI_PREFIX } from '../config';
+import { IIIF_BASE_URL } from '../config';
 
 function createRouter(version: number) {
   const streamImageFromFile = (params: { id: string }) => {
@@ -27,7 +27,7 @@ function createRouter(version: number) {
     }
 
     try {
-      const iiifUrl = `${IIIF_URI_PREFIX}api/iiif/${version}${req.path}`;
+      const iiifUrl = `${IIIF_BASE_URL}api/iiif/${version}${req.path}`;
       const iiifProcessor = new Processor(
         iiifUrl,
         streamImageFromFile,

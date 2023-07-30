@@ -3,7 +3,7 @@ import {
   getImagesByManifestId,
   getManifestById,
 } from '../utils/db';
-import { IIIF_URI_PREFIX } from '../config';
+import { IIIF_BASE_URL } from '../config';
 import { manifestURI } from '../utils/uri';
 
 const router = express.Router();
@@ -39,8 +39,8 @@ router.get('/2/:id.json', async (req, res) => {
         const canvasURI = `${manifestId}/canvas/${
           index + 1
         }`;
-        const resourceId = `${IIIF_URI_PREFIX}api/iiif/2/${image.name}.tif/full/full/0/default.jpg`;
-        const imageId = `${IIIF_URI_PREFIX}api/iiif/2/${image.name}.tif`;
+        const resourceId = `${IIIF_BASE_URL}api/iiif/2/${image.name}.tif/full/full/0/default.jpg`;
+        const imageId = `${IIIF_BASE_URL}api/iiif/2/${image.name}.tif`;
         return {
           '@id': canvasURI,
           '@type': 'sc:Canvas',
