@@ -90,7 +90,10 @@ type ImageUpload = {
   mimetype: string;
   size: number;
   md5: string;
-  mv: (path: string) => void;
+  mv: (
+    path: string,
+    callback: (err: any) => Promise<any>
+  ) => void;
 };
 
 router.post('/:id/images', checkAuth, async (req, res) => {
@@ -139,40 +142,46 @@ router.post('/:id/images', checkAuth, async (req, res) => {
     const images = Array.isArray(req.files!.images)
       ? (req.files!.images as ImageUpload[])
       : [req.files!.images as ImageUpload];
-    const promises = images.map((image: any) => {
+    // add images to db and copy to filesystem sequentially
+    await images.reduce((promise: Promise<any>, image) => {
       const { size, data, md5 } = image;
       const hash = md5;
       const dimension = bufferImageSize(data);
-      image.mv(
-        `${__dirname}/../../images/original/${hash}.jpg`,
-        async (err: any) => {
-          if (err) {
-            logger.error("couldn't upload image", {
-              error: err,
-            });
-          } else {
-            logger.info('image uploaded', { hash });
-            await convertToPtiff(hash);
-            logger.info('image converted to ptiff', {
-              hash,
-            });
-            await updateImageStatus(hash);
-            logger.info('image status updated', { hash });
+      return promise.then(async () => {
+        await addImage({
+          name: hash,
+          uid: user.id,
+          size,
+          width: dimension.width,
+          height: dimension.height,
+          manifestId: id,
+          status: 'converting',
+        });
+        image.mv(
+          `${__dirname}/../../images/original/${hash}.jpg`,
+          async (err: any) => {
+            if (err) {
+              logger.error("couldn't upload image", {
+                error: err,
+              });
+            } else {
+              logger.info('image uploaded', { hash });
+              await convertToPtiff(hash);
+              logger.info('image converted to ptiff', {
+                hash,
+              });
+              await updateImageStatus(hash);
+              logger.info('image status updated', { hash });
+            }
           }
-        }
-      );
-      return addImage({
-        name: hash,
-        uid: user.id,
-        size,
-        width: dimension.width,
-        height: dimension.height,
-        manifestId: id,
-        status: 'uploading',
+        );
       });
-    });
-    await Promise.all(promises);
-    req.flash('info', 'Images uploaded.');
+    }, Promise.resolve());
+
+    req.flash(
+      'info',
+      'Images uploaded. Conversion started.'
+    );
     return res.redirect(`/manifests/${id}/images`);
   }
 });
