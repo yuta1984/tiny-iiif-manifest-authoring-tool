@@ -14,7 +14,10 @@ import { checkAuth } from './utils/auth';
 import { getAllManifestsOrderByCreatedAt } from './utils/db';
 import dayjs from 'dayjs';
 import logger from './utils/logger';
+import sqlite3 from 'sqlite3';
+import sqliteStoreFactory from 'express-session-sqlite';
 
+const SqliteStore = sqliteStoreFactory(session);
 const app = express();
 
 app.use(expressLayouts);
@@ -40,10 +43,19 @@ app.set('view engine', 'ejs');
 // session
 app.use(
   session({
-    secret: 'keyboard doggo',
+    store: new SqliteStore({
+      // Database library to use. Any library is fine as long as the API is compatible
+      // with sqlite3, such as sqlite3-offline
+      driver: sqlite3.Database,
+      // for in-memory database
+      // path: ':memory:'
+      path: 'db/db.sqlite3',
+      // Session TTL in milliseconds
+      ttl: 1000 * 60 * 60 * 24 * 7,
+    }),
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false },
+    secret: 'keyboard doggo',
   })
 );
 // logging
